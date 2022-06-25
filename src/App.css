@@ -4,3 +4,14 @@ body {
     background-attachment: fixed;
     background-size: cover;
 }
+
+div {
+    display: grid;
+    place-items: center;
+    border: 1px solid;
+}
+
+#app-div {
+    width: 800px;
+    height: 630px;
+}
