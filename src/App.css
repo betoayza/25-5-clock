@@ -8,6 +8,7 @@ body {
 div {
     display: grid;
     place-items: center;
+    border: 2px solid;
 }
 
 h1 {
@@ -28,4 +29,10 @@ label {
     /* background-attachment: fixed; */
     background-size: 100% 100%;
     background-repeat: no-repeat;
+}
+
+#break-session-div {
+    display: flex;
+    justify-content: space-between;
+    width: 400px;
 }
