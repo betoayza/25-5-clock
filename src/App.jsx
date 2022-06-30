@@ -7,7 +7,7 @@ function App() {
 
   return (
     <div id="app-div">
-      <Clock  />
+      <Clock />
     </div>
   )
 }
