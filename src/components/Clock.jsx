@@ -2,17 +2,19 @@ import React, { useState, useEffect } from "react";
 import moment from "moment";
 import useCountDown from "react-countdown-hook";
 
-const initialTime = 25 * 60 * 1000; // initial time in milliseconds, defaults to 60000
+//const initialTime = 25 * 60 * 1000; // initial time in milliseconds, defaults to 60000
 const INTERVAL = 1000; // INTERVAL to change remaining time amount, defaults to 1000
 
 export const Clock = () => {
   const [breakLength, setBreakLength] = useState(5);
   const [sessionLength, setSessionLength] = useState(25);
   const [timeLeft, { start, pause, resume, reset }] = useCountDown(
-    initialTime,
+    breakLength,
     INTERVAL
   );
   const [timerState, setTimerState] = useState("stopping");
+  const [breakFlag, setBreakFlag] = useState(false);
+
 
   const handleStartStop = () => {
     let bDbtn = document.getElementById("break-decrement-btn");
@@ -23,13 +25,14 @@ export const Clock = () => {
     switch (timerState) {
       case "stopping":
         start();
+        setBreakFlag(true);
         console.log("Running...");
         setTimerState("running");
 
         bDbtn.disabled = true;
         bIbtn.disabled = true;
         sDbtn.disabled = true;
-        sIbtn.disabled = true;        
+        sIbtn.disabled = true;   
 
         break;
 
@@ -47,14 +50,29 @@ export const Clock = () => {
 
         break;
       case "paused":
-        resume();
-        console.log("Running");
-        setTimerState("running");
-
-        bDbtn.disabled = true;
-        bIbtn.disabled = true;
-        sDbtn.disabled = true;
-        sIbtn.disabled = true;
+        console.log("paused...");
+        if(breakFlag===true){
+          const session = moment(
+            new Date(timeLeft).toISOString()
+          ).format("mm:ss");
+          console.log(session, typeof session);      
+          
+            const timerText = document.getElementById("timer-label");
+            timerText.textContent = "Break...";
+            const newTime = breakLength * 60 * 1000;
+            setBreakFlag(false);
+            start(newTime);
+            
+          }else{
+          resume();
+          console.log("Running");
+          setTimerState("running");
+  
+          bDbtn.disabled = true;
+          bIbtn.disabled = true;
+          sDbtn.disabled = true;
+          sIbtn.disabled = true;
+        }
 
         break;
     }
@@ -118,15 +136,9 @@ export const Clock = () => {
   const showSession = () => {
     console.log(timeLeft);
     const session = moment(
-      new Date(timeLeft + sessionLength).toISOString()
+      new Date(timeLeft).toISOString()
     ).format("mm:ss");
-    console.log(session, typeof session);
-
-    if (session === "00:00") {
-      document.getElementById("session-label").innerHTML = "Break...";
-      const newTime = breakLength * 60 * 1000;
-      start(newTime);
-    }
+    console.log(session, typeof session);  
 
     return session;
   };
