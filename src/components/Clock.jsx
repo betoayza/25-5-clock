@@ -2,37 +2,36 @@ import React, { useState, useEffect } from "react";
 import moment from "moment";
 import useCountDown from "react-countdown-hook";
 
-//const initialTime = 25 * 60 * 1000; // initial time in milliseconds, defaults to 60000
+const initialTime = 25 * 60 * 1000; // initial time in milliseconds, defaults to 60000
 const INTERVAL = 1000; // INTERVAL to change remaining time amount, defaults to 1000
 
 export const Clock = () => {
   const [breakLength, setBreakLength] = useState(5);
   const [sessionLength, setSessionLength] = useState(25);
   const [timeLeft, { start, pause, resume, reset }] = useCountDown(
-    breakLength,
+    initialTime,
     INTERVAL
   );
   const [timerState, setTimerState] = useState("stopping");
-  const [breakFlag, setBreakFlag] = useState(false);
-
+  const [breakTimer, setBreakTimer] = useState(null);
 
   const handleStartStop = () => {
-    let bDbtn = document.getElementById("break-decrement-btn");
-    let bIbtn = document.getElementById("break-increment-btn");
-    let sDbtn = document.getElementById("session-decrement-btn");
-    let sIbtn = document.getElementById("session-increment-btn");
+    let bDbtn = document.getElementById("break-decrement");
+    let bIbtn = document.getElementById("break-increment");
+    let sDbtn = document.getElementById("session-decrement");
+    let sIbtn = document.getElementById("session-increment");
 
     switch (timerState) {
+      //first start
       case "stopping":
-        start();
-        setBreakFlag(true);
+        start(sessionLength * 60 * 1000);
         console.log("Running...");
         setTimerState("running");
 
         bDbtn.disabled = true;
         bIbtn.disabled = true;
         sDbtn.disabled = true;
-        sIbtn.disabled = true;   
+        sIbtn.disabled = true;
 
         break;
 
@@ -41,8 +40,6 @@ export const Clock = () => {
         console.log("Paused.");
         setTimerState("paused");
 
-        bDbtn = document.getElementById("break-decrement-btn");
-        bIbtn = document.getElementById("break-increment-btn");
         bDbtn.disabled = false;
         bIbtn.disabled = false;
         sDbtn.disabled = false;
@@ -50,29 +47,14 @@ export const Clock = () => {
 
         break;
       case "paused":
-        console.log("paused...");
-        if(breakFlag===true){
-          const session = moment(
-            new Date(timeLeft).toISOString()
-          ).format("mm:ss");
-          console.log(session, typeof session);      
-          
-            const timerText = document.getElementById("timer-label");
-            timerText.textContent = "Break...";
-            const newTime = breakLength * 60 * 1000;
-            setBreakFlag(false);
-            start(newTime);
-            
-          }else{
-          resume();
-          console.log("Running");
-          setTimerState("running");
-  
-          bDbtn.disabled = true;
-          bIbtn.disabled = true;
-          sDbtn.disabled = true;
-          sIbtn.disabled = true;
-        }
+        resume();
+        console.log("Running");
+        setTimerState("running");
+
+        bDbtn.disabled = true;
+        bIbtn.disabled = true;
+        sDbtn.disabled = true;
+        sIbtn.disabled = true;
 
         break;
     }
@@ -91,22 +73,18 @@ export const Clock = () => {
       case "-":
         if (sessionLength >= 2 && sessionLength <= 60) {
           setSessionLength(sessionLength - 1);
-          const newTime = (sessionLength - 1) * 60 * 1000;
-          console.log(newTime);
-          start(newTime);
+          start((sessionLength - 1) * 60 * 1000);
           pause();
-        } else sessionLength;
+        } else return;
 
         break;
 
       case "+":
-        if (sessionLength > 0 && sessionLength <= 59) {
+        if (sessionLength >= 1 && sessionLength <= 59) {
           setSessionLength(sessionLength + 1);
-          const newTime = (sessionLength + 1) * 60 * 1000;
-          console.log(newTime);
-          start(newTime);
+          start((sessionLength + 1) * 60 * 1000);
           pause();
-        } else sessionLength;
+        } else return;
 
         break;
     }
@@ -118,16 +96,16 @@ export const Clock = () => {
 
     switch (operator) {
       case "-":
-        if (breakLength >= 2 && breakLength <= 60) {
+        if (breakLength > 1 && breakLength <= 60) {
           setBreakLength(breakLength - 1);
-        } else breakLength;
+        } else return;
 
         break;
 
       case "+":
-        if (breakLength > 0 && breakLength <= 59) {
+        if (breakLength >= 1 && breakLength <= 59) {
           setBreakLength(breakLength + 1);
-        } else breakLength;
+        } else return;
 
         break;
     }
@@ -135,10 +113,31 @@ export const Clock = () => {
 
   const showSession = () => {
     console.log(timeLeft);
-    const session = moment(
-      new Date(timeLeft).toISOString()
-    ).format("mm:ss");
-    console.log(session, typeof session);  
+    let session = moment(new Date(timeLeft).toISOString()).format("mm:ss");
+    console.log(session, typeof session);
+
+    //start break
+    if (session === "00:01") {
+      console.log("Starting break in 1 second...");
+      setInterval(() => {
+        document.getElementById(
+          "timer-label"
+        ).innerHTML = `<span style='color: red'>Break...</span>`;
+        //document.getElementById("time-left").innerHTML = `<span style='color: red'>${timeLeft} </span>`;
+        start(breakLength * 60 * 1000);
+      }, 1000);
+
+      // let bDbtn = document.getElementById("break-decrement");
+      // let bIbtn = document.getElementById("break-increment");
+      // let sDbtn = document.getElementById("session-decrement");
+      // let sIbtn = document.getElementById("session-increment");
+
+      // bDbtn.disabled = true;
+      // bIbtn.disabled = true;
+      // sDbtn.disabled = true;
+      // sIbtn.disabled = true;
+
+    }
 
     return session;
   };
@@ -151,10 +150,10 @@ export const Clock = () => {
         <div>
           <label id="break-label">Break Length</label>
           <label id="break-length">{breakLength}</label>
-          <button id="break-decrement-btn" onClick={handleBreakLength}>
+          <button id="break-decrement" onClick={handleBreakLength}>
             -
           </button>
-          <button id="break-increment-btn" onClick={handleBreakLength}>
+          <button id="break-increment" onClick={handleBreakLength}>
             +
           </button>
         </div>
@@ -162,10 +161,10 @@ export const Clock = () => {
         <div>
           <label id="session-label">Session Length</label>
           <label id="session-length">{sessionLength}</label>
-          <button id="session-decrement-btn" onClick={handleSessionLength}>
+          <button id="session-decrement" onClick={handleSessionLength}>
             -
           </button>
-          <button id="session-increment-btn" onClick={handleSessionLength}>
+          <button id="session-increment" onClick={handleSessionLength}>
             +
           </button>
         </div>
