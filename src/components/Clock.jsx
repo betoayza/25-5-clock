@@ -24,6 +24,7 @@ export const Clock = () => {
     switch (timerState) {
       //first start
       case "stopping":
+        document.getElementById("timer-label").innerHTML = "Session";
         start(sessionLength * 60 * 1000);
         console.log("Running...");
         setTimerState("running");
@@ -61,8 +62,9 @@ export const Clock = () => {
   };
 
   const restart = () => {
-    reset();
-    start();
+    document.getElementById("timer-label").innerHTML = "Session";
+    start(initialTime);
+    pause();   
   };
 
   const handleSessionLength = (e) => {
@@ -124,8 +126,8 @@ export const Clock = () => {
           "timer-label"
         ).innerHTML = `<span style='color: red'>Break...</span>`;
         //document.getElementById("time-left").innerHTML = `<span style='color: red'>${timeLeft} </span>`;
-        start(breakLength * 60 * 1000);
       }, 1000);
+      start(breakLength * 60 * 1000);
 
       // let bDbtn = document.getElementById("break-decrement");
       // let bIbtn = document.getElementById("break-increment");
@@ -136,7 +138,6 @@ export const Clock = () => {
       // bIbtn.disabled = true;
       // sDbtn.disabled = true;
       // sIbtn.disabled = true;
-
     }
 
     return session;
