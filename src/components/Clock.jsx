@@ -2,14 +2,14 @@ import React, { useState, useEffect } from "react";
 import moment from "moment";
 import useCountDown from "react-countdown-hook";
 
-const initialTime = 25 * 60 * 1000; // initial time in milliseconds, defaults to 60000
+const INITIAL_TIME = 25 * 60 * 1000; // initial time in milliseconds, defaults to 60000
 const INTERVAL = 1000; // INTERVAL to change remaining time amount, defaults to 1000
 
 export const Clock = () => {
   const [breakLength, setBreakLength] = useState(5);
   const [sessionLength, setSessionLength] = useState(25);
-  const [timeLeft, { start, pause, resume, reset }] = useCountDown(
-    initialTime,
+  const [timeLeft, { start, pause, resume }] = useCountDown(
+    INITIAL_TIME,
     INTERVAL
   );
   const [timerState, setTimerState] = useState("stopping");
@@ -24,7 +24,7 @@ export const Clock = () => {
     switch (timerState) {
       //first start
       case "stopping":
-        document.getElementById("timer-label").innerHTML = "Session";
+        // document.getElementById("timer-label").innerHTML = "Session";
         start(sessionLength * 60 * 1000);
         console.log("Running...");
         setTimerState("running");
@@ -62,9 +62,12 @@ export const Clock = () => {
   };
 
   const restart = () => {
-    document.getElementById("timer-label").innerHTML = "Session";
-    start(initialTime);
-    pause();   
+    document.getElementById(
+      "timer-label"
+    ).innerHTML = `<span style='color: white'>Session</span>`;
+    console.log("Reset clicked");
+    start(INITIAL_TIME);
+    pause();
   };
 
   const handleSessionLength = (e) => {
@@ -114,30 +117,25 @@ export const Clock = () => {
   };
 
   const showSession = () => {
-    console.log(timeLeft);
+    //console.log(timeLeft);
     let session = moment(new Date(timeLeft).toISOString()).format("mm:ss");
     console.log(session, typeof session);
 
-    //start break
-    if (session === "00:01") {
-      console.log("Starting break in 1 second...");
-      setInterval(() => {
-        document.getElementById(
-          "timer-label"
-        ).innerHTML = `<span style='color: red'>Break...</span>`;
-        //document.getElementById("time-left").innerHTML = `<span style='color: red'>${timeLeft} </span>`;
-      }, 1000);
-      start(breakLength * 60 * 1000);
-
-      // let bDbtn = document.getElementById("break-decrement");
-      // let bIbtn = document.getElementById("break-increment");
-      // let sDbtn = document.getElementById("session-decrement");
-      // let sIbtn = document.getElementById("session-increment");
-
-      // bDbtn.disabled = true;
-      // bIbtn.disabled = true;
-      // sDbtn.disabled = true;
-      // sIbtn.disabled = true;
+    if (session === "00:00") {
+      start();
+      pause();
+      console.log(timeLeft);
+    } else {
+      //start break
+      if (session === "00:01") {
+        console.log("Starting break in 1 second...");
+        setInterval(() => {
+          document.getElementById(
+            "timer-label"
+          ).innerHTML = `<span style='color: red'>Break...</span>`;
+        }, 1000);
+        start(breakLength * 60 * 1000);
+      }
     }
 
     return session;
