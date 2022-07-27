@@ -36,3 +36,7 @@ label {
     justify-content: space-between;
     width: 400px;
 }
+
+#time-left {
+    font-size: 40px;
+}

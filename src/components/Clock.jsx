@@ -35,7 +35,6 @@ export const Clock = () => {
         sIbtn.disabled = true;
 
         break;
-
       case "running":
         pause();
         console.log("Paused.");
@@ -122,19 +121,19 @@ export const Clock = () => {
     console.log(session, typeof session);
 
     if (session === "00:00") {
-      start();
+      start(sessionLength * 60 * 1000);
       pause();
       console.log(timeLeft);
     } else {
       //start break
-      if (session === "00:01") {
+      if (session == "00:01") {
         console.log("Starting break in 1 second...");
-        setInterval(() => {
+        setTimeout(() => {
           document.getElementById(
             "timer-label"
           ).innerHTML = `<span style='color: red'>Break...</span>`;
+          start(breakLength * 60 * 1000);
         }, 1000);
-        start(breakLength * 60 * 1000);
       }
     }
 
