@@ -132,6 +132,19 @@ export const Clock = () => {
           document.getElementById(
             "timer-label"
           ).innerHTML = `<span style='color: red'>Break...</span>`;
+
+          const playSound = async () => {
+            const audio = document.getElementById("beep");
+            console.log(audio);
+
+            await audio
+              .play()
+              .then(() => {})
+              .catch((error) => error);
+
+            audio.currentTime = 0;
+          };
+          playSound();
           start(breakLength * 60 * 1000);
         }, 1000);
       }
@@ -185,6 +198,14 @@ export const Clock = () => {
       >
         Reset
       </button>
+      <audio
+        src="https://raw.githubusercontent.com/freeCodeCamp/cdn/master/build/testable-projects-fcc/audio/BeepSound.wav"
+        type="audio/mpeg"
+        className="clip"
+        id="beep"
+      >
+        Error
+      </audio>
     </div>
   );
 };
