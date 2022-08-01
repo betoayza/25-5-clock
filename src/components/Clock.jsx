@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import moment from "moment";
 import useCountDown from "react-countdown-hook";
 
@@ -13,7 +13,7 @@ export const Clock = () => {
     INTERVAL
   );
   const [timerState, setTimerState] = useState("stopping");
-  const [breakTimer, setBreakTimer] = useState(null);
+  // const [timer, setTimer] = useState("");
 
   const handleStartStop = () => {
     let bDbtn = document.getElementById("break-decrement");
@@ -27,7 +27,6 @@ export const Clock = () => {
         // document.getElementById("timer-label").innerHTML = "Session";
         start(sessionLength * 60 * 1000);
         console.log("Running...");
-        setTimerState("running");
 
         bDbtn.disabled = true;
         bIbtn.disabled = true;
@@ -38,7 +37,6 @@ export const Clock = () => {
       case "running":
         pause();
         console.log("Paused.");
-        setTimerState("paused");
 
         bDbtn.disabled = false;
         bIbtn.disabled = false;
@@ -49,7 +47,6 @@ export const Clock = () => {
       case "paused":
         resume();
         console.log("Running");
-        setTimerState("running");
 
         bDbtn.disabled = true;
         bIbtn.disabled = true;
@@ -65,6 +62,16 @@ export const Clock = () => {
       "timer-label"
     ).innerHTML = `<span style='color: white'>Session</span>`;
     console.log("Reset clicked");
+
+    const playSound = async () => {
+      const audio = document.getElementById("beep");
+      console.log(audio);
+      await audio.pause();
+
+      audio.currentTime = 0;
+    };
+    playSound();
+
     start(INITIAL_TIME);
     pause();
   };
@@ -120,7 +127,7 @@ export const Clock = () => {
     let session = moment(new Date(timeLeft).toISOString()).format("mm:ss");
     console.log(session, typeof session);
 
-    if (session === "00:00") {
+    if (session == "00:00") {
       start(sessionLength * 60 * 1000);
       pause();
       console.log(timeLeft);
@@ -141,8 +148,6 @@ export const Clock = () => {
               .play()
               .then(() => {})
               .catch((error) => error);
-
-            audio.currentTime = 0;
           };
           playSound();
           start(breakLength * 60 * 1000);
