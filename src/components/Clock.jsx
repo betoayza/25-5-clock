@@ -14,44 +14,35 @@ export const Clock = () => {
   );
   const [timerState, setTimerState] = useState("stopping");
   // const [timer, setTimer] = useState("");
+  const bDbtn = document.getElementById("break-decrement");
+  const bIbtn = document.getElementById("break-increment");
+  const sDbtn = document.getElementById("session-decrement");
+  const sIbtn = document.getElementById("session-increment");
 
   const handleStartStop = () => {
-    let bDbtn = document.getElementById("break-decrement");
-    let bIbtn = document.getElementById("break-increment");
-    let sDbtn = document.getElementById("session-decrement");
-    let sIbtn = document.getElementById("session-increment");
-
+    bDbtn.disabled = true;
+    bIbtn.disabled = true;
+    sDbtn.disabled = true;
+    sIbtn.disabled = true;
     switch (timerState) {
       //first start
       case "stopping":
         // document.getElementById("timer-label").innerHTML = "Session";
         start(sessionLength * 60 * 1000);
+        setTimerState("running");
         console.log("Running...");
-
-        bDbtn.disabled = true;
-        bIbtn.disabled = true;
-        sDbtn.disabled = true;
-        sIbtn.disabled = true;
 
         break;
       case "running":
         pause();
+        setTimerState("paused");
         console.log("Paused.");
-
-        bDbtn.disabled = false;
-        bIbtn.disabled = false;
-        sDbtn.disabled = false;
-        sIbtn.disabled = false;
 
         break;
       case "paused":
         resume();
+        setTimerState("running");
         console.log("Running");
-
-        bDbtn.disabled = true;
-        bIbtn.disabled = true;
-        sDbtn.disabled = true;
-        sIbtn.disabled = true;
 
         break;
     }
@@ -71,6 +62,11 @@ export const Clock = () => {
       audio.currentTime = 0;
     };
     playSound();
+
+    bDbtn.disabled = false;
+    bIbtn.disabled = false;
+    sDbtn.disabled = false;
+    sIbtn.disabled = false;
 
     start(INITIAL_TIME);
     pause();
