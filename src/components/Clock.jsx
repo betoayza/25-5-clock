@@ -14,12 +14,12 @@ export const Clock = () => {
   );
   const [timerState, setTimerState] = useState("stopping");
   // const [timer, setTimer] = useState("");
-  const bDbtn = document.getElementById("break-decrement");
-  const bIbtn = document.getElementById("break-increment");
-  const sDbtn = document.getElementById("session-decrement");
-  const sIbtn = document.getElementById("session-increment");
 
   const handleStartStop = () => {
+    const bDbtn = document.getElementById("break-decrement");
+    const bIbtn = document.getElementById("break-increment");
+    const sDbtn = document.getElementById("session-decrement");
+    const sIbtn = document.getElementById("session-increment");
     bDbtn.disabled = true;
     bIbtn.disabled = true;
     sDbtn.disabled = true;
@@ -63,6 +63,10 @@ export const Clock = () => {
     };
     playSound();
 
+    const bDbtn = document.getElementById("break-decrement");
+    const bIbtn = document.getElementById("break-increment");
+    const sDbtn = document.getElementById("session-decrement");
+    const sIbtn = document.getElementById("session-increment");
     bDbtn.disabled = false;
     bIbtn.disabled = false;
     sDbtn.disabled = false;
