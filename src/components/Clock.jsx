@@ -1,108 +1,67 @@
-import React, { useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import moment from "moment";
-import useCountDown from "react-countdown-hook";
-
-const INITIAL_TIME = 25 * 60 * 1000; // initial time in milliseconds, defaults to 60000
-const INTERVAL = 1000; // INTERVAL to change remaining time amount, defaults to 1000
 
 export const Clock = () => {
   const [breakLength, setBreakLength] = useState(5);
   const [sessionLength, setSessionLength] = useState(25);
-  const [timeLeft, { start, pause, resume }] = useCountDown(
-    INITIAL_TIME,
-    INTERVAL
-  );
-  const [timerState, setTimerState] = useState("stopping");
-  // const [timer, setTimer] = useState("");
+  const [timeLeft, setTimeLeft] = useState(sessionLength * 60 * 1000);
+  const [isBreakTime, setIsBreakTime] = useState(false);
+  const [isRunning, setIsRunning] = useState(false);
+  const [isStopped, setIsStopped] = useState(false);
+  const alarmRef = useRef(null);
+
+  const breakingTimeStyle = {
+    color: "red",
+  };
+
+  const sessionTimeStyle = {
+    color: "yellowgreen",
+  };
+
+  const stoppedStyle = {
+    color: "red",
+  };
 
   const handleStartStop = () => {
-    const bDbtn = document.getElementById("break-decrement");
-    const bIbtn = document.getElementById("break-increment");
-    const sDbtn = document.getElementById("session-decrement");
-    const sIbtn = document.getElementById("session-increment");
-    bDbtn.disabled = true;
-    bIbtn.disabled = true;
-    sDbtn.disabled = true;
-    sIbtn.disabled = true;
-    switch (timerState) {
-      //first start
-      case "stopping":
-        // document.getElementById("timer-label").innerHTML = "Session";
-        start(sessionLength * 60 * 1000);
-        setTimerState("running");
-        console.log("Running...");
-
-        break;
-      case "running":
-        pause();
-        setTimerState("paused");
-        console.log("Paused.");
-
-        break;
-      case "paused":
-        resume();
-        setTimerState("running");
-        console.log("Running");
-
-        break;
-    }
+    setIsRunning((prevState) => !prevState);
+    setIsStopped((prevState) => !prevState);
   };
 
-  const restart = () => {
-    document.getElementById(
-      "timer-label"
-    ).innerHTML = `<span style='color: white'>Session</span>`;
-    console.log("Reset clicked");
+  const handleRestartTimer = async () => {
+    setIsBreakTime(false);
+    setIsRunning(false);
+    setTimeLeft(25 * 60 * 1000);
+    setSessionLength(25);
+    setBreakLength(5);
 
-    const playSound = async () => {
-      const audio = document.getElementById("beep");
-      console.log(audio);
-      await audio.pause();
+    playAlarm();
+  }; //works
 
-      audio.currentTime = 0;
-    };
-    playSound();
-
-    const bDbtn = document.getElementById("break-decrement");
-    const bIbtn = document.getElementById("break-increment");
-    const sDbtn = document.getElementById("session-decrement");
-    const sIbtn = document.getElementById("session-increment");
-    bDbtn.disabled = false;
-    bIbtn.disabled = false;
-    sDbtn.disabled = false;
-    sIbtn.disabled = false;
-
-    start(INITIAL_TIME);
-    pause();
-  };
-
-  const handleSessionLength = (e) => {
+  const handleSessionLengthChange = (e) => {
     console.log(e.target.innerText);
+
     const operator = e.target.innerText.toString();
 
     switch (operator) {
       case "-":
         if (sessionLength >= 2 && sessionLength <= 60) {
-          setSessionLength(sessionLength - 1);
-          start((sessionLength - 1) * 60 * 1000);
-          pause();
+          setSessionLength((prevState) => prevState - 1);
         } else return;
 
         break;
 
       case "+":
         if (sessionLength >= 1 && sessionLength <= 59) {
-          setSessionLength(sessionLength + 1);
-          start((sessionLength + 1) * 60 * 1000);
-          pause();
+          setSessionLength((prevState) => prevState + 1);
         } else return;
 
         break;
     }
-  };
+  }; // works
 
-  const handleBreakLength = (e) => {
+  const handleBreakLengthChange = (e) => {
     console.log(e.target.innerText);
+
     const operator = e.target.innerText.toString();
 
     switch (operator) {
@@ -120,43 +79,71 @@ export const Clock = () => {
 
         break;
     }
+  }; //works
+
+  const playAlarm = () => {
+    if (alarmRef.current) {
+      alarmRef.current
+        .play()
+        .then(() => {})
+        .catch((error) => error);
+    }
   };
 
-  const showSession = () => {
-    //console.log(timeLeft);
-    let session = moment(new Date(timeLeft).toISOString()).format("mm:ss");
-    console.log(session, typeof session);
+  // update timer by Session setup
+  useEffect(() => {
+    setTimeLeft(sessionLength * 60 * 1000);
+  }, [sessionLength]);
 
-    if (session == "00:00") {
-      start(sessionLength * 60 * 1000);
-      pause();
-      console.log(timeLeft);
-    } else {
-      //start break
-      if (session == "00:01") {
-        console.log("Starting break in 1 second...");
-        setTimeout(() => {
-          document.getElementById(
-            "timer-label"
-          ).innerHTML = `<span style='color: red'>Break...</span>`;
+  // handle break time beginning
+  useEffect(() => {
+    if (isBreakTime) {
+      console.log("Is break time...");
 
-          const playSound = async () => {
-            const audio = document.getElementById("beep");
-            console.log(audio);
+      setTimeLeft(breakLength * 60 * 1000);
 
-            await audio
-              .play()
-              .then(() => {})
-              .catch((error) => error);
-          };
-          playSound();
-          start(breakLength * 60 * 1000);
+      playAlarm();
+    }
+  }, [isBreakTime]);
+
+  // handle time points
+  useEffect(() => {
+    if (isRunning) {
+      if (timeLeft === 0 && !isBreakTime) {
+        const timer1 = setTimeout(() => {
+          setIsBreakTime(true);
         }, 1000);
+
+        return () => {
+          clearTimeout(timer1);
+        };
+      }
+
+      if (timeLeft === 0 && isBreakTime) {
+        const timer2 = setTimeout(() => {
+          handleRestartTimer();
+        }, 1000);
+
+        return () => {
+          clearTimeout(timer2);
+        };
       }
     }
+  }, [timeLeft, isRunning, isBreakTime]);
 
-    return session;
-  };
+  // Tick handler
+  useEffect(() => {
+    if (isRunning) {
+      const countdownInterval = setInterval(
+        () => setTimeLeft((prevTimeLeft) => prevTimeLeft - 1000),
+        1000
+      );
+
+      return () => {
+        clearInterval(countdownInterval);
+      };
+    }
+  }, [isRunning, timeLeft]); //timeLeft es necesario en el tracker
 
   return (
     <div id="app-div">
@@ -164,31 +151,70 @@ export const Clock = () => {
 
       <div id="break-session-div">
         <div>
-          <label id="break-label">Break Length</label>
+          <label id="break-label">Break</label>
           <label id="break-length">{breakLength}</label>
-          <button id="break-decrement" onClick={handleBreakLength}>
-            -
-          </button>
-          <button id="break-increment" onClick={handleBreakLength}>
+          <button
+            id="break-increment"
+            onClick={handleBreakLengthChange}
+            disabled={isStopped}
+          >
             +
+          </button>
+          <button
+            id="break-decrement"
+            onClick={handleBreakLengthChange}
+            disabled={isStopped}
+          >
+            -
           </button>
         </div>
 
         <div>
-          <label id="session-label">Session Length</label>
+          <label id="session-label">Session</label>
           <label id="session-length">{sessionLength}</label>
-          <button id="session-decrement" onClick={handleSessionLength}>
-            -
-          </button>
-          <button id="session-increment" onClick={handleSessionLength}>
+          <button
+            id="session-increment"
+            onClick={handleSessionLengthChange}
+            disabled={isStopped}
+          >
             +
+          </button>
+          <button
+            id="session-decrement"
+            onClick={handleSessionLengthChange}
+            disabled={isStopped}
+          >
+            -
           </button>
         </div>
       </div>
 
       <div>
-        <label id="timer-label">Session</label>
-        <label id="time-left">{showSession()}</label>
+        <label
+          id="timer-label"
+          style={
+            isRunning
+              ? isBreakTime
+                ? breakingTimeStyle
+                : sessionTimeStyle
+              : timeLeft === sessionLength * 60 * 1000
+              ? { color: "white" }
+              : stoppedStyle
+          }
+        >
+          {isRunning
+            ? isBreakTime
+              ? "break..."
+              : "Timing..."
+            : timeLeft === sessionLength * 60 * 1000
+            ? "Session"
+            : "Stopped"}
+        </label>
+        <label id="time-left">
+          {timeLeft === 60 * 60 * 1000
+            ? "60:00"
+            : moment.utc(timeLeft).format("mm:ss")}
+        </label>
       </div>
       <button id="start_stop" onClick={handleStartStop}>
         Start/Stop
@@ -198,7 +224,7 @@ export const Clock = () => {
         onClick={() => {
           setBreakLength(5);
           setSessionLength(25);
-          restart();
+          handleRestartTimer();
         }}
       >
         Reset
@@ -208,6 +234,7 @@ export const Clock = () => {
         type="audio/mpeg"
         className="clip"
         id="beep"
+        ref={alarmRef}
       >
         Error
       </audio>
