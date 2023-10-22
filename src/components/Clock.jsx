@@ -7,7 +7,10 @@ export const Clock = () => {
   const [timeLeft, setTimeLeft] = useState(sessionLength * 60 * 1000);
   const [isBreakTime, setIsBreakTime] = useState(false);
   const [isRunning, setIsRunning] = useState(false);
-  const [isStopped, setIsStopped] = useState(false);
+  const [isStopped, setIsStopped] = useState(true);
+  const [timeStyle, setTimeStyle] = useState({ color: "white" });
+  const [isBreakAndSessionEnabled, setIsBreakAndSessionEnabled] =
+    useState(true);
   const alarmRef = useRef(null);
 
   const breakingTimeStyle = {
@@ -25,14 +28,18 @@ export const Clock = () => {
   const handleStartStop = () => {
     setIsRunning((prevState) => !prevState);
     setIsStopped((prevState) => !prevState);
+    setIsBreakAndSessionEnabled(false);
   };
 
   const handleRestartTimer = async () => {
     setIsBreakTime(false);
     setIsRunning(false);
+    setIsStopped(true);
     setTimeLeft(25 * 60 * 1000);
     setSessionLength(25);
     setBreakLength(5);
+    setTimeStyle({ color: "white" });
+    setIsBreakAndSessionEnabled(true);
 
     playAlarm();
   }; //works
@@ -90,6 +97,20 @@ export const Clock = () => {
     }
   };
 
+  useEffect(() => {
+    isBreakAndSessionEnabled && isStopped && setTimeStyle({ color: "white" });
+    !isBreakAndSessionEnabled && isStopped && setTimeStyle(stoppedStyle);
+
+    isRunning && !isBreakTime && setTimeStyle(sessionTimeStyle);
+    !isBreakTime &&
+      isRunning &&
+      !isStopped &&
+      !isBreakAndSessionEnabled &&
+      setTimeStyle(sessionTimeStyle);
+
+    isRunning && isBreakTime && setTimeStyle(breakingTimeStyle);
+  }, [isRunning, isStopped, isBreakTime, isBreakAndSessionEnabled]);
+
   // update timer by Session setup
   useEffect(() => {
     setTimeLeft(sessionLength * 60 * 1000);
@@ -110,6 +131,8 @@ export const Clock = () => {
   useEffect(() => {
     if (isRunning) {
       if (timeLeft === 0 && !isBreakTime) {
+        setTimeStyle(breakingTimeStyle);
+
         const timer1 = setTimeout(() => {
           setIsBreakTime(true);
         }, 1000);
@@ -120,6 +143,8 @@ export const Clock = () => {
       }
 
       if (timeLeft === 0 && isBreakTime) {
+        setTimeStyle({ color: "white" });
+
         const timer2 = setTimeout(() => {
           handleRestartTimer();
         }, 1000);
@@ -143,7 +168,7 @@ export const Clock = () => {
         clearInterval(countdownInterval);
       };
     }
-  }, [isRunning, timeLeft]); //timeLeft es necesario en el tracker
+  }, [isRunning, timeLeft]);
 
   return (
     <div id="app-div">
@@ -156,14 +181,14 @@ export const Clock = () => {
           <button
             id="break-increment"
             onClick={handleBreakLengthChange}
-            disabled={isStopped}
+            disabled={!isBreakAndSessionEnabled}
           >
             +
           </button>
           <button
             id="break-decrement"
             onClick={handleBreakLengthChange}
-            disabled={isStopped}
+            disabled={!isBreakAndSessionEnabled}
           >
             -
           </button>
@@ -175,14 +200,14 @@ export const Clock = () => {
           <button
             id="session-increment"
             onClick={handleSessionLengthChange}
-            disabled={isStopped}
+            disabled={!isBreakAndSessionEnabled}
           >
             +
           </button>
           <button
             id="session-decrement"
             onClick={handleSessionLengthChange}
-            disabled={isStopped}
+            disabled={!isBreakAndSessionEnabled}
           >
             -
           </button>
@@ -190,25 +215,16 @@ export const Clock = () => {
       </div>
 
       <div>
-        <label
-          id="timer-label"
-          style={
-            isRunning
-              ? isBreakTime
-                ? breakingTimeStyle
-                : sessionTimeStyle
-              : timeLeft === sessionLength * 60 * 1000
-              ? { color: "white" }
-              : stoppedStyle
-          }
-        >
-          {isRunning
-            ? isBreakTime
-              ? "break..."
-              : "Timing..."
-            : timeLeft === sessionLength * 60 * 1000
+        <label id="timer-label" style={timeStyle}>
+          {isBreakAndSessionEnabled
             ? "Session"
-            : "Stopped"}
+            : isRunning
+            ? isBreakTime
+              ? "Break..."
+              : "Timing..."
+            : isStopped
+            ? "Stopped"
+            : "Timing..."}
         </label>
         <label id="time-left">
           {timeLeft === 60 * 60 * 1000

@@ -1,5 +1,1 @@
-- mostrar 60 en formato "mm:ss"
-- ver si "setIsRunning" conviene que vaya en "handleReset()" o en el "useEffect()"
-- Al terminar la session empieza el break time en "60:00"
-- lograr los "00:00" casos
-- Ver los casos de styles en cuando "handleStartStop" 
+- seguir los tests
