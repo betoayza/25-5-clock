@@ -42,6 +42,7 @@ export const Clock = () => {
     setIsBreakAndSessionEnabled(true);
 
     playAlarm();
+    rewindAlarm();
   }; //works
 
   const handleSessionLengthChange = (e) => {
@@ -90,10 +91,15 @@ export const Clock = () => {
 
   const playAlarm = () => {
     if (alarmRef.current) {
-      alarmRef.current
-        .play()
-        .then(() => {})
-        .catch((error) => error);
+      alarmRef.current.currentTime = 0;
+      alarmRef.current.play();
+    }
+  };
+
+  const rewindAlarm = () => {
+    if (alarmRef.current) {
+      alarmRef.current.pause();
+      alarmRef.current.currentTime = 0;
     }
   };
 
