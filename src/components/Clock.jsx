@@ -1,6 +1,18 @@
 import React, { useEffect, useState, useRef } from "react";
 import moment from "moment";
 
+const breakingTimeStyle = {
+  color: "red",
+};
+
+const sessionTimeStyle = {
+  color: "yellowgreen",
+};
+
+const stoppedStyle = {
+  color: "red",
+};
+
 export const Clock = () => {
   const [breakLength, setBreakLength] = useState(5);
   const [sessionLength, setSessionLength] = useState(25);
@@ -12,18 +24,6 @@ export const Clock = () => {
   const [isBreakAndSessionEnabled, setIsBreakAndSessionEnabled] =
     useState(true);
   const alarmRef = useRef(null);
-
-  const breakingTimeStyle = {
-    color: "red",
-  };
-
-  const sessionTimeStyle = {
-    color: "yellowgreen",
-  };
-
-  const stoppedStyle = {
-    color: "red",
-  };
 
   const handleStartStop = () => {
     setIsRunning((prevState) => !prevState);
@@ -43,11 +43,20 @@ export const Clock = () => {
 
     playAlarm();
     rewindAlarm();
-  }; //works
+  };
+
+  const startNewSession = () => {
+    setIsBreakTime(false);
+    setSessionLength(25);
+    setBreakLength(5);
+    setTimeLeft(25 * 60 * 1000);
+    setTimeStyle({ color: "white" });
+
+    playAlarm();
+    rewindAlarm();
+  };
 
   const handleSessionLengthChange = (e) => {
-    console.log(e.target.innerText);
-
     const operator = e.target.innerText.toString();
 
     switch (operator) {
@@ -65,11 +74,9 @@ export const Clock = () => {
 
         break;
     }
-  }; // works
+  };
 
   const handleBreakLengthChange = (e) => {
-    console.log(e.target.innerText);
-
     const operator = e.target.innerText.toString();
 
     switch (operator) {
@@ -87,7 +94,7 @@ export const Clock = () => {
 
         break;
     }
-  }; //works
+  };
 
   const playAlarm = () => {
     if (alarmRef.current) {
@@ -125,8 +132,6 @@ export const Clock = () => {
   // handle break time beginning
   useEffect(() => {
     if (isBreakTime) {
-      console.log("Is break time...");
-
       setTimeLeft(breakLength * 60 * 1000);
 
       playAlarm();
@@ -152,7 +157,7 @@ export const Clock = () => {
         setTimeStyle({ color: "white" });
 
         const timer2 = setTimeout(() => {
-          handleRestartTimer();
+          startNewSession();
         }, 1000);
 
         return () => {
@@ -177,11 +182,13 @@ export const Clock = () => {
   }, [isRunning, timeLeft]);
 
   return (
-    <div id="app-div">
-      <h1>25+5 Clock</h1>
+    <div id="main-div">
+      <div class="div-gen" id="title-div">
+        <h1>25+5 Clock</h1>
+      </div>
 
       <div id="break-session-div">
-        <div>
+        <div class="div-gen format-break-session-div">
           <label id="break-label">Break</label>
           <label id="break-length">{breakLength}</label>
           <button
@@ -200,7 +207,7 @@ export const Clock = () => {
           </button>
         </div>
 
-        <div>
+        <div class="div-gen format-break-session-div">
           <label id="session-label">Session</label>
           <label id="session-length">{sessionLength}</label>
           <button
@@ -220,7 +227,7 @@ export const Clock = () => {
         </div>
       </div>
 
-      <div>
+      <div class="div-gen">
         <label id="timer-label" style={timeStyle}>
           {isBreakAndSessionEnabled
             ? "Session"

@@ -1,7 +1,5 @@
-#root {
+#app-div {
+  height: 100vh;
   display: grid;
   place-items: center;
-  border: solid 2px;
-  width: auto;
-  height: 690px;
 }
